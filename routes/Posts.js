@@ -57,4 +57,19 @@ router.post("/", async (req, res) => {
   }
 });
 
+router.delete("/byId/delete/:id", async (req, res) => {
+  const id = req.params.id;
+  try {
+    const post = await posts.findByPk(id);
+    if (!post) {
+      return res.status(404).json({ error: "post not found" });
+    }
+    await post.destroy(); // Delete the user
+    return res.status(204).send(); // No content, successful deletion
+  } catch (err) {
+    console.error("Error deleting user:", error);
+    return res.json({ error: err });
+  }
+});
+
 module.exports = router;
