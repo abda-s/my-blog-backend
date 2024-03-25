@@ -12,6 +12,9 @@ app.use(cors());
 const postRouter = require("./routes/Posts");
 app.use("/posts", postRouter);
 
+const UsersRouter = require("./routes/Users");
+app.use("/auth", UsersRouter);
+
 db.sequelize.sync().then(() => {
   app.listen(PORT, () => {
     console.log(`server running on http://localhost:${PORT}`);
