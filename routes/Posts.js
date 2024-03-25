@@ -12,6 +12,17 @@ router.get("/", async (req, res) => {
   }
 });
 
+router.get("/byId/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const onePost = await posts.findByPk(id);
+    res.json(onePost);
+  } catch (err) {
+    console.error("Error with gitting one post:", error);
+    res.status(500).json({ error: "Failed to create post" });
+  }
+});
+
 router.post("/", async (req, res) => {
   try {
     const post = req.body;
