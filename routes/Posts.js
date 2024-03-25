@@ -1,13 +1,14 @@
 const express = require("express");
 const router = express.Router();
-const { posts } = require("../models");
+const { posts, users } = require("../models");
+const { validateToken } = require("../middlewares/AuthMiddlewares");
 
 router.get("/", async (req, res) => {
   try {
     const listOfPosts = await posts.findAll();
     res.json(listOfPosts);
   } catch (err) {
-    console.error("Error with res:", error);
+    console.error("Error with res:", err);
     res.status(500).json({ error: "Failed to respond" });
   }
 });
@@ -18,12 +19,12 @@ router.get("/byId/:id", async (req, res) => {
     const onePost = await posts.findByPk(id);
     res.json(onePost);
   } catch (err) {
-    console.error("Error with gitting one post:", error);
+    console.error("Error with gitting one post:", err);
     res.status(500).json({ error: "Failed to create post" });
   }
 });
 
-router.put("/byId/edit/:id", async (req, res) => {
+router.put("/byId/edit/:id", validateToken(["admin"]), async (req, res) => {
   try {
     const id = req.params.id;
     const postEdited = req.body;
@@ -41,12 +42,12 @@ router.put("/byId/edit/:id", async (req, res) => {
 
     res.json(postEdited);
   } catch (err) {
-    console.error("Error with gitting one post:", error);
+    console.error("Error with gitting one post:", err);
     res.status(500).json({ error: "Failed to create post" });
   }
 });
 
-router.post("/", async (req, res) => {
+router.post("/", validateToken(["admin"]), async (req, res) => {
   try {
     const post = req.body;
     await posts.create(post);
@@ -57,19 +58,23 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.delete("/byId/delete/:id", async (req, res) => {
-  const id = req.params.id;
-  try {
-    const post = await posts.findByPk(id);
-    if (!post) {
-      return res.status(404).json({ error: "post not found" });
+router.delete(
+  "/byId/delete/:id",
+  validateToken(["admin"]),
+  async (req, res) => {
+    const id = req.params.id;
+    try {
+      const post = await posts.findByPk(id);
+      if (!post) {
+        return res.status(404).json({ error: "post not found" });
+      }
+      await post.destroy(); // Delete the user
+      return res.status(204).send(); // No content, successful deletion
+    } catch (err) {
+      console.error("Error deleting user:", err);
+      return res.json({ error: err });
     }
-    await post.destroy(); // Delete the user
-    return res.status(204).send(); // No content, successful deletion
-  } catch (err) {
-    console.error("Error deleting user:", error);
-    return res.json({ error: err });
   }
-});
+);
 
 module.exports = router;

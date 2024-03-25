@@ -8,6 +8,11 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.TEXT,
       allowNULL: false,
     },
+    role: {
+      type: DataTypes.TEXT,
+      allowNULL: false,
+      defaultValue: "user",
+    },
   });
 
   return users;
