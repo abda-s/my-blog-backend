@@ -3,7 +3,7 @@ const router = express.Router();
 const { users } = require("../models");
 const bcrypt = require("bcrypt");
 const { sign } = require("jsonwebtoken");
-
+const { validateToken } = require("../middlewares/AuthMiddlewares");
 const isPasswordStrong = (password) => {
   // Define criteria for a strong password (e.g., minimum length, presence of special characters, etc.)
   const minLength = 8;
@@ -90,7 +90,12 @@ router.post("/login", async (req, res) => {
         { username: user.username, id: user.id, role: user.role },
         "theJWTsecret"
       );
-      res.json({ token: accessToken, username: user.username, id: user.id });
+      res.json({
+        token: accessToken,
+        username: user.username,
+        id: user.id,
+        role: user.role,
+      });
       console.log("You have successfully logged in");
     });
   } catch (error) {
@@ -99,7 +104,7 @@ router.post("/login", async (req, res) => {
   }
 });
 
-router.get("/auth", (req, res) => {
+router.get("/auth", validateToken([]), (req, res) => {
   res.json(req.user);
 });
 
