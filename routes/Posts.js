@@ -23,6 +23,29 @@ router.get("/byId/:id", async (req, res) => {
   }
 });
 
+router.put("/byId/edit/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const postEdited = req.body;
+    await posts.update(
+      {
+        title: postEdited.title,
+        image: postEdited.image,
+        description: postEdited.description,
+        content: postEdited.content,
+      },
+      {
+        where: { id: id },
+      }
+    );
+
+    res.json(postEdited);
+  } catch (err) {
+    console.error("Error with gitting one post:", error);
+    res.status(500).json({ error: "Failed to create post" });
+  }
+});
+
 router.post("/", async (req, res) => {
   try {
     const post = req.body;
