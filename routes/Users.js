@@ -4,6 +4,7 @@ const { users } = require("../models");
 const bcrypt = require("bcrypt");
 const { sign } = require("jsonwebtoken");
 const { validateToken } = require("../middlewares/AuthMiddlewares");
+
 const isPasswordStrong = (password) => {
   // Define criteria for a strong password (e.g., minimum length, presence of special characters, etc.)
   const minLength = 8;
@@ -42,6 +43,33 @@ const isPasswordStrong = (password) => {
   return { isValid, errorMessage };
 };
 
+const isUsernameValid = (username) => {
+  // Define criteria for a valid username (e.g., no spaces or special characters except '_', '-')
+  const minLength = 3;
+  const regex = /^[a-zA-Z0-9_-]+$/;
+  const containsSpaces = /\s/.test(username);
+  const containsSpecialChars = /[^\w-]/.test(username);
+
+  let isValid = true;
+  let errorMessage = "";
+
+  if (containsSpaces) {
+    isValid = false;
+    errorMessage += "Username must not contain spaces.  ";
+  }
+  if (password.length < minLength) {
+    isValid = false;
+    errorMessage += " at least 3 characters,";
+  }
+  if (containsSpecialChars) {
+    isValid = false;
+    errorMessage +=
+      "Username must not contain special characters except '_', '-'. ";
+  }
+
+  return { isValid, errorMessage };
+};
+
 router.post("/", async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -49,6 +77,13 @@ router.post("/", async (req, res) => {
     const existingUser = await users.findOne({ where: { username: username } });
     if (existingUser) {
       return res.json({ error: "Username already exists" });
+    }
+
+    // Check if the username is valid
+    const { isValid: usernameIsValid, errorMessage: usernameErrorMessage } =
+      isUsernameValid(username);
+    if (!usernameIsValid) {
+      return res.status(400).json({ error: usernameErrorMessage });
     }
 
     // Check if the password is strong
