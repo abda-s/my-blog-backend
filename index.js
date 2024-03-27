@@ -15,6 +15,9 @@ app.use("/posts", postRouter);
 const UsersRouter = require("./routes/Users");
 app.use("/auth", UsersRouter);
 
+const CommentsRouter = require("./routes/Comments");
+app.use("/comments", CommentsRouter);
+
 db.sequelize.sync().then(() => {
   app.listen(PORT, () => {
     console.log(`server running on http://localhost:${PORT}`);
